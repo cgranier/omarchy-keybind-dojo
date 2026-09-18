@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "cgranier.dojo",
+  "name": "Keybind Dojo",
+  "version": "0.1.0",
+  "author": "Carlos Granier",
+  "license": "MIT",
+  "description": "Learn your own Hyprland keybindings: a fullscreen quiz built from the binds you actually have, that remembers which ones you keep missing.",
+  "kinds": [
+    "overlay"
+  ],
+  "entryPoints": {
+    "overlay": "Dojo.qml"
+  }
+}

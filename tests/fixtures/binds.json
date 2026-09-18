@@ -1,0 +1,17 @@
+[
+ {"mouse":false,"modmask":64,"submap":"","key":"W","keycode":0,"catch_all":false,"description":"Close window"},
+ {"mouse":false,"modmask":64,"submap":"","key":"RETURN","keycode":0,"catch_all":false,"description":"Terminal"},
+ {"mouse":false,"modmask":65,"submap":"","key":"B","keycode":0,"catch_all":false,"description":"Browser (private)"},
+ {"mouse":false,"modmask":64,"submap":"","key":"B","keycode":0,"catch_all":false,"description":"Browser"},
+ {"mouse":false,"modmask":64,"submap":"","key":"","keycode":0,"catch_all":false,"description":"Switch to workspace 3"},
+ {"mouse":false,"modmask":65,"submap":"","key":"","keycode":0,"catch_all":false,"description":"Move window to workspace 10"},
+ {"mouse":false,"modmask":64,"submap":"","key":"","keycode":0,"catch_all":false,"description":"Expand window left"},
+ {"mouse":false,"modmask":68,"submap":"","key":"comma","keycode":0,"catch_all":false,"description":"Dismiss notification"},
+ {"mouse":false,"modmask":64,"submap":"","key":"ESCAPE","keycode":0,"catch_all":false,"description":"System menu"},
+ {"mouse":false,"modmask":0,"submap":"","key":"XF86AudioMute","keycode":0,"catch_all":false,"description":"Mute"},
+ {"mouse":false,"modmask":1,"submap":"","key":"XF86AudioMute","keycode":0,"catch_all":false,"description":"Switch audio output"},
+ {"mouse":true,"modmask":64,"submap":"","key":"mouse:272","keycode":0,"catch_all":false,"description":"Move window"},
+ {"mouse":false,"modmask":64,"submap":"cgranier_dojo","key":"ESCAPE","keycode":0,"catch_all":false,"description":"Leave Keybind Dojo"},
+ {"mouse":false,"modmask":64,"submap":"","key":"W","keycode":0,"catch_all":false,"description":"Close window (release)"},
+ {"mouse":false,"modmask":64,"submap":"","key":"Q","keycode":0,"catch_all":false,"description":""}
+]

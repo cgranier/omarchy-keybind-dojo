@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Suspends and restores Hyprland's global keybindings for Keybind Dojo.
+#
+# While the dojo is open, pressing SUPER+W must reach the quiz instead of
+# closing a window. A submap with no binds of its own does exactly that: only
+# a submap's binds are live while it is active, and everything else falls
+# through to the focused surface.
+#
+# Usage: dojo-submap enter | leave | watch
+#   enter  define the submap if needed, switch to it, start the watchdog
+#   leave  switch back (only if the dojo submap is the active one)
+#   watch  restore the binds as soon as the dojo stops answering, so a shell
+#          crash or reload can never strand the session without keybindings
+
+SUBMAP="cgranier_dojo"
+
+current() { hyprctl submap 2>/dev/null | head -n1; }
+
+leave() {
+  [[ $(current) == "$SUBMAP" ]] && hyprctl eval 'hl.dispatch(hl.dsp.submap("reset"))' >/dev/null 2>&1
+  return 0
+}
+
+case "${1:-}" in
+enter)
+  # SUPER+ESCAPE always gets you out, even if the overlay is wedged.
+  if ! hyprctl binds -j 2>/dev/null | jq -e --arg s "$SUBMAP" 'any(.[]; .submap == $s)' >/dev/null; then
+    hyprctl eval "hl.define_submap(\"$SUBMAP\", function() hl.bind(\"SUPER + ESCAPE\", hl.dsp.submap(\"reset\"), { description = \"Leave Keybind Dojo\" }) end)" >/dev/null 2>&1
+  fi
+  hyprctl eval "hl.dispatch(hl.dsp.submap(\"$SUBMAP\"))" >/dev/null 2>&1
+  setsid "$0" watch >/dev/null 2>&1 &
+  ;;
+leave)
+  leave
+  ;;
+watch)
+  while [[ $(current) == "$SUBMAP" ]]; do
+    sleep 1
+    [[ $(omarchy-shell cgranier.dojo isOpen 2>/dev/null) == "true" ]] || { leave; exit 0; }
+    # A locked session means nobody is playing; never hold the binds under it.
+    [[ $(omarchy-shell lock isLocked 2>/dev/null) == "true" ]] && { omarchy-shell shell hide cgranier.dojo >/dev/null 2>&1; leave; exit 0; }
+  done
+  ;;
+*)
+  echo "Usage: dojo-submap enter | leave | watch" >&2
+  exit 1
+  ;;
+esac
