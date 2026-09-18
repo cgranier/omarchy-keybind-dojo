@@ -148,7 +148,7 @@ Item {
       alt: !!(event.modifiers & Qt.AltModifier), meta: !!(event.modifiers & Qt.MetaModifier)
     })
 
-    if (Model.isModifierKey(event.key)) return
+    if (Model.isModifierKey(event.key, event.nativeScanCode)) return
     if (mods === 0) { handleControl(event); return }
 
     var chord = Model.pressChordId({
@@ -171,13 +171,17 @@ Item {
     if (mode === "name" && event.key >= Qt.Key_1 && event.key <= Qt.Key_4) choose(event.key - Qt.Key_1)
   }
 
+  // The lit keycaps follow Qt's modifier state, corrected for the key in this
+  // very event (Qt reports the state from just before it). Rebuilding from the
+  // event each time means a missed release can't leave a keycap stuck.
   function trackModifiers(event, down) {
-    var bit = event.key === Qt.Key_Shift ? Model.MOD_SHIFT
-      : event.key === Qt.Key_Control ? Model.MOD_CTRL
-      : event.key === Qt.Key_Alt ? Model.MOD_ALT
-      : (event.key === Qt.Key_Meta || event.key === Qt.Key_Super_L || event.key === Qt.Key_Super_R) ? Model.MOD_SUPER : 0
-    if (bit === 0) return
-    heldMods = down ? (heldMods | bit) : (heldMods & ~bit)
+    var mods = Model.pressModmask({
+      shift: !!(event.modifiers & Qt.ShiftModifier), ctrl: !!(event.modifiers & Qt.ControlModifier),
+      alt: !!(event.modifiers & Qt.AltModifier), meta: !!(event.modifiers & Qt.MetaModifier)
+    })
+    var bit = Model.modifierBit({ key: event.key, scanCode: event.nativeScanCode })
+    if (bit !== 0) mods = down ? (mods | bit) : (mods & ~bit)
+    heldMods = mods
   }
 
   function saveStats() {

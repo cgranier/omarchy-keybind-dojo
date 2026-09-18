@@ -127,7 +127,28 @@ var SCANCODES = {
   49: "GRAVE", 51: "BACKSLASH", 59: "COMMA", 60: "PERIOD", 61: "SLASH"
 }
 
-function isModifierKey(qtKey) {
+// Physical modifier keys by scancode (evdev + 8). Layout options remap what a
+// modifier *means* — with shift:both_capslock_cancel, releasing Shift arrives
+// as Caps Lock — but not where it sits, so position is what gets trusted.
+var MODIFIER_SCANCODES = {
+  50: MOD_SHIFT, 62: MOD_SHIFT, 37: MOD_CTRL, 105: MOD_CTRL, 64: MOD_ALT, 108: MOD_ALT, 133: MOD_SUPER, 134: MOD_SUPER
+}
+
+var QT_MODIFIER_BITS = {
+  0x01000020: MOD_SHIFT, 0x01000021: MOD_CTRL, 0x01000023: MOD_ALT, 0x01000022: MOD_SUPER,
+  0x01000053: MOD_SUPER, 0x01000054: MOD_SUPER
+}
+
+// Which modifier a key event is for, or 0. Scancode first, Qt key as the
+// fallback for keyboards that report something unusual.
+function modifierBit(press) {
+  var byPosition = MODIFIER_SCANCODES[press.scanCode]
+  if (byPosition !== undefined) return byPosition
+  return QT_MODIFIER_BITS[Number(press.key) || 0] || 0
+}
+
+function isModifierKey(qtKey, scanCode) {
+  if (MODIFIER_SCANCODES[scanCode] !== undefined) return true
   return QT.modifiers.indexOf(qtKey) !== -1
 }
 
@@ -147,7 +168,7 @@ function pressKey(press) {
 // The chord id for a press, or "" while only modifiers are down or the key is
 // one the dojo doesn't know.
 function pressChordId(press) {
-  if (isModifierKey(Number(press.key) || 0)) return ""
+  if (isModifierKey(Number(press.key) || 0, press.scanCode)) return ""
   var key = pressKey(press)
   if (key === "") return ""
   return chordId(pressModmask(press), key)
@@ -274,7 +295,7 @@ if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     MOD_SHIFT: MOD_SHIFT, MOD_CTRL: MOD_CTRL, MOD_ALT: MOD_ALT, MOD_SUPER: MOD_SUPER, QT: QT,
     modNames: modNames, canonicalKey: canonicalKey, keyLabel: keyLabel, inferDigitKey: inferDigitKey,
-    chordId: chordId, cardsFromBinds: cardsFromBinds, keycaps: keycaps, isModifierKey: isModifierKey,
+    chordId: chordId, cardsFromBinds: cardsFromBinds, keycaps: keycaps, isModifierKey: isModifierKey, modifierBit: modifierBit,
     pressModmask: pressModmask, pressKey: pressKey, pressChordId: pressChordId, cardById: cardById,
     cardWeight: cardWeight, pickCard: pickCard, choicesFor: choicesFor, shuffle: shuffle,
     recordAnswer: recordAnswer, parseStats: parseStats, serializeStats: serializeStats,

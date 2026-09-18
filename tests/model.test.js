@@ -99,4 +99,16 @@ test("stats round-trip and scoring", () => {
   assert.strictEqual(M.rank(0, 0), "No bindings found")
 })
 
+test("modifier keys are read by position, so layout options can't disguise them", () => {
+  // shift:both_capslock_cancel: releasing Shift arrives as Caps Lock (0x01000024) on scancode 50.
+  assert.strictEqual(M.modifierBit({ key: 0x01000024, scanCode: 50 }), M.MOD_SHIFT)
+  assert.strictEqual(M.modifierBit({ key: 0x01000020, scanCode: 62 }), M.MOD_SHIFT)
+  assert.strictEqual(M.modifierBit({ key: 0x01000022, scanCode: 133 }), M.MOD_SUPER)
+  assert.strictEqual(M.modifierBit({ key: 0x01000021, scanCode: 0 }), M.MOD_CTRL)      // no scancode: Qt key
+  assert.strictEqual(M.modifierBit({ key: 0x57, scanCode: 25 }), 0)
+  assert.strictEqual(M.isModifierKey(0x01000024, 50), true)
+  // The second Shift going down as "Caps Lock" must not be read as a chord.
+  assert.strictEqual(M.pressChordId({ key: 0x01000024, scanCode: 62, shift: true }), "")
+})
+
 console.log("\n" + passed + " tests passed")
