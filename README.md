@@ -3,6 +3,8 @@
 Learn **your own** Hyprland keybindings. A fullscreen quiz built from the binds you actually have
 (`hyprctl binds -j`), that remembers which ones you keep missing and asks those more often.
 
+![Keybind Dojo asking for a shortcut](docs/dojo.png)
+
 ## Two ways to train
 
 - **Press it** — you see what a binding does ("Close window") and press the chord. The modifiers you hold light
@@ -30,7 +32,7 @@ Requires Hyprland's Lua config API (`hl.define_submap`), as shipped with Omarchy
 ## Install
 
 ```bash
-omarchy plugin add <this-repo-url> --enable
+omarchy plugin add https://github.com/cgranier/omarchy-keybind-dojo.git --enable
 ```
 
 Open it with `omarchy-shell shell toggle cgranier.dojo '{}'` (add `'{"mode":"name"}'` to start in Name it).
