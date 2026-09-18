@@ -42,6 +42,16 @@ To put it in the Omarchy menu under Learn, add to `~/.config/omarchy/extensions/
 "learn.dojo": {"icon":"󰌌","label":"Keybind Dojo","action":"omarchy-shell shell toggle cgranier.dojo '{}'","aliases":["dojo"]},
 ```
 
+## Uninstall
+
+```bash
+omarchy plugin remove cgranier.dojo
+rm -rf ~/.local/state/omarchy-dojo        # optional: your quiz progress
+```
+
+If you added the `learn.dojo` row to `~/.config/omarchy/extensions/omarchy-menu.jsonc`, delete that line too. The plugin
+changes nothing else: the Hyprland submap it uses exists only at runtime and is gone after a Hyprland reload.
+
 ## Keys
 
 | Key | Action |
