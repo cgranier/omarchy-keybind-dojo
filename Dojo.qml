@@ -186,7 +186,8 @@ Item {
 
   function saveStats() {
     if (Object.keys(stats).length === 0) return
-    statsFile.setText(Model.serializeStats(stats))
+    pendingWrite = Model.serializeStats(stats)
+    if (!writeProcess.running) flushWrite()
   }
 
   // ---- Wiring -------------------------------------------------------------
@@ -214,7 +215,9 @@ Item {
   Process {
     id: bindsProcess
     running: false
-    command: ["hyprctl", "binds", "-j"]
+    // Bounded: the bind list is whatever the config declares; four megabytes
+    // is far more than any real one, and the cap keeps the shell's memory ours.
+    command: ["timeout", "10", "sh", "-c", 'hyprctl binds -j | head -c 4000000']
     stdout: StdioCollector { id: bindsStdout; waitForEnd: true }
     onExited: function(exitCode) {
       var binds = []
@@ -224,18 +227,32 @@ Item {
     }
   }
 
-  Process {
-    running: true
-    command: ["mkdir", "-p", root.stateDir]
+  // The stats file is never opened by the shell: bin/dojo-state checks the
+  // directory chain, refuses links, FIFOs and oversized files, and writes
+  // atomically. Writes are serialised; one made while another runs waits.
+  readonly property string stateScript: String(Qt.resolvedUrl("bin/dojo-state")).replace(/^file:\/\//, "")
+  property string pendingWrite: ""
+
+  function flushWrite() {
+    if (pendingWrite === "") return
+    writeProcess.command = ["timeout", "10", "/usr/bin/python3", stateScript, "write", stateDir + "/stats.json", pendingWrite]
+    pendingWrite = ""
+    writeProcess.running = true
   }
 
-  FileView {
-    id: statsFile
-    path: root.stateDir + "/stats.json"
-    watchChanges: false
-    atomicWrites: true
-    printErrors: false
-    onLoaded: root.stats = Model.parseStats(text())
+  Process {
+    id: readProcess
+    running: true
+    command: ["timeout", "10", "/usr/bin/python3", root.stateScript, "read", root.stateDir + "/stats.json"]
+    stdout: StdioCollector { id: readOut; waitForEnd: true }
+    onExited: function(exitCode) { root.stats = Model.parseStats(exitCode === 0 ? readOut.text : "{}") }
+  }
+
+  Process {
+    id: writeProcess
+    running: false
+    command: []
+    onExited: root.flushWrite()
   }
 
   // Walk away mid-round and the dojo closes itself, well before the
